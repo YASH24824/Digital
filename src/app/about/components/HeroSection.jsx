@@ -212,7 +212,7 @@ export default function HeroSection({ heroVisible, setHovered }) {
             zIndex: 20,
           }}
         >
-          ↓
+          
         </div>
       )}
 
