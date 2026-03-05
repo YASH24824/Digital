@@ -345,9 +345,9 @@ export default function Hero() {
             {/* Threefriends Image - hidden when hovering */}
             <div style={{
               position: "absolute",
-              left: "0%", 
+              left: "-3%", 
               bottom: "10%",
-              width: 800,
+              width: 700,
               height: 400,
               maxWidth: "40vw",
               zIndex: 4,
