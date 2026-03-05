@@ -40,8 +40,8 @@ const ContactIcon = () => (
 const navItems = [
   { name: "Home",       href: "/",          icon: HomeIcon      },
   { name: "Who We Are", href: "/about",     icon: WhoWeAreIcon  },
-  { name: "Services",   href: "/#services",  icon: ServicesIcon  },
-  { name: "Contact Us", href: "/#contact",   icon: ContactIcon   },
+  { name: "Services",   href: "/services",  icon: ServicesIcon  },
+  { name: "Contact Us", href: "/contact",   icon: ContactIcon   },
 ];
 
 export default function Navbar() {
@@ -233,7 +233,7 @@ export default function Navbar() {
 
             {/* CTA pill */}
             <Link
-              href="/#contact"
+              href="/contact"
               style={{
                 marginLeft: 8,
                 height: 44,

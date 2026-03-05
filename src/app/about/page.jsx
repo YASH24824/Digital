@@ -9,6 +9,7 @@ import CustomCursor from "./components/CustomCursor";
 import HeroSection from "./components/HeroSection";
 import ProjectSection from "./components/ProjectSection";
 import TeamSection from "./components/TeamSection";
+import Hero from "../components/Home/Hero";
 export default function AboutPage() {
   const [mouse, setMouse] = useState({ x: -100, y: -100 });
   const [hovered, setHovered] = useState(false);
@@ -38,7 +39,8 @@ export default function AboutPage() {
       <CustomCursor mouse={mouse} hovered={hovered} ACCENT={ACCENT} />
 
       {/* Hero Section - with SplashCursor only */}
-      <HeroSection heroVisible={heroVisible} setHovered={setHovered} />
+      {/* <HeroSection heroVisible={heroVisible} setHovered={setHovered} /> */}
+      <Hero />
 
       {/* Project Sections - each wrapped with BlobBackground */}
       {projects.map((project, index) => (

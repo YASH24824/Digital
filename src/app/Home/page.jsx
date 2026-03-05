@@ -8,6 +8,7 @@ import OurServices from "../components/Home/Ourservices";
 import HowWeWork from "../components/Home/Howwework";
 import ScrollStory from "../components/Home/ScrollStoryWrapper";
 import Testimonials from "../components/Home/Testimonials";
+import HeroSection from "../about/components/HeroSection";
 
 export default function Home() {
   const lenisRef = useRef(null);
@@ -45,7 +46,8 @@ export default function Home() {
 
   return (
     <ScrollStory>
-      <Hero />
+      <HeroSection/>
+      {/* <Hero /> */}
       <WhatWeOffer />
       {/* <OurServices /> */}
       <HowWeWork />
