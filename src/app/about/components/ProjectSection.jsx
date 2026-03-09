@@ -3,8 +3,95 @@ import { useInView } from "../hooks/useInView";
 import BlobBackground from "./BlobBackground";
 import { DARK, PARTICLES } from "../data/aboutData";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
-// Website links from your chart
+// Accent colors
+const ACCENT = "#9B7B5E";
+const ACCENT_SOFT = "rgba(155,123,94,0.10)";
+const ACCENT_MID = "rgba(155,123,94,0.30)";
+
+const globalStyles = `
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes arrowSlide {
+    0% { transform: translateX(0); }
+    50% { transform: translateX(6px); }
+    100% { transform: translateX(0); }
+  }
+
+  @keyframes shimmer {
+    0% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.2); }
+    100% { opacity: 0.2; transform: scale(1); }
+  }
+
+  @keyframes imageZoom {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+  }
+
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.9, 0.3, 1), transform 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  .fade-up.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .project-card {
+    transition: all 0.5s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  .project-card:hover {
+    transform: scale(1.02) translateY(-8px);
+  }
+
+  .project-card:active {
+    transform: scale(0.98);
+  }
+
+  .project-image {
+    transition: transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+
+  .project-card:hover .project-image {
+    transform: scale(1.05);
+  }
+
+  .website-link {
+    transition: all 0.2s ease;
+  }
+
+  .website-link:hover {
+    color: ${ACCENT};
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .project-card:active {
+      background: linear-gradient(135deg, #2C2C2C, #1A1A1A);
+      transition: background 0.2s ease;
+    }
+  }
+`;
+
+// Website links organized by categories as per your structure
 const websiteLinks = {
   "Industrial & Engineering": {
     "theinfinityengineering.com": "https://theinfinityengineering.com",
@@ -32,59 +119,86 @@ const websiteLinks = {
   }
 };
 
+// Category order as per your list
+const categoryOrder = [
+  "Industrial & Engineering",
+  "Trading, Export & Distribution",
+  "E-Commerce & Consumer Brands",
+  "Energy & Sustainability",
+  "Social, Education & Community Services"
+];
+
 // Professional font styles
 const fonts = {
-  heading: "'Crimson Text', 'Playfair Display', Georgia, serif",
-  subheading: "'Crimson Pro', 'Crimson Text', Georgia, serif",
-  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  mono: "'JetBrains Mono', 'Fira Code', monospace",
-  stats: "'Crimson Pro', 'Times New Roman', serif"
+  heading: "'Playfair Display', Georgia, serif",
+  subheading: "'DM Sans', sans-serif",
+  body: "'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+  mono: "'DM Sans', monospace",
 };
 
-// Contrast colors that work with black & white
+// Colors with accent for both light and dark sections
 const getContrastColor = (isEven) => {
   if (isEven) {
-    // White background sections - dark colors for contrast
+    // Light sections - dark text with accent
     return {
-      primary: '#1A1A1A',      // Rich black
-      secondary: '#2C2C2C',    // Dark gray
-      accent: '#4A4A4A',       // Medium gray
-      highlight: '#636363',     // Warm gray
-      text: '#000000',          // Pure black
-      lightText: '#333333',     // Dark gray text
-      border: 'rgba(0,0,0,0.1)',
-      gradient: 'linear-gradient(135deg, #1A1A1A, #2C2C2C)'
+      primary: '#1A1A1A',
+      secondary: '#2C2C2C',
+      accent: ACCENT,
+      accentSoft: ACCENT_SOFT,
+      accentMid: ACCENT_MID,
+      highlight: '#636363',
+      text: '#1A1A1A',
+      lightText: '#555555',
+      lighterText: '#777777',
+      border: 'rgba(0,0,0,0.08)',
+      borderAccent: `${ACCENT_MID}`,
+      gradient: `linear-gradient(135deg, #F8F8F8, #FFFFFF)`,
+      cardGradient: `linear-gradient(135deg, #F5F5F5, #FFFFFF)`,
     };
   } else {
-    // Black background sections - light colors for contrast
+    // Dark sections - light text with accent
     return {
-      primary: '#FFFFFF',       // Pure white
-      secondary: '#F5F5F5',     // Off white
-      accent: '#E0E0E0',        // Light gray
-      highlight: '#CCCCCC',      // Silver
-      text: '#FFFFFF',           // White text
-      lightText: '#E0E0E0',      // Light gray text
-      border: 'rgba(255,255,255,0.2)',
-      gradient: 'linear-gradient(135deg, #FFFFFF, #F0F0F0)'
+      primary: '#FFFFFF',
+      secondary: '#F5F5F5',
+      accent: ACCENT,
+      accentSoft: ACCENT_SOFT,
+      accentMid: ACCENT_MID,
+      highlight: '#CCCCCC',
+      text: '#FFFFFF',
+      lightText: '#AAAAAA',
+      lighterText: '#888888',
+      border: 'rgba(255,255,255,0.1)',
+      borderAccent: `${ACCENT_MID}`,
+      gradient: `linear-gradient(135deg, #1A1A1A, #2C2C2C)`,
+      cardGradient: `linear-gradient(135deg, #2C2C2C, #1A1A1A)`,
     };
   }
+};
+
+// Image mapping for each sector
+const getCategoryImage = (category) => {
+  const imageMap = {
+    "Industrial & Engineering": "/industrial-engineering.jpg",
+    "Trading, Export & Distribution": "/trading-export.jpg",
+    "E-Commerce & Consumer Brands": "/ecommerce-consumer.jpg",
+    "Energy & Sustainability": "/energy-sustainability.jpg",
+    "Social, Education & Community Services": "/social-education.jpg"
+  };
+  return imageMap[category] || "/social-education.jpg";
 };
 
 export default function ProjectSection({ project, index }) {
   const [ref, visible] = useInView(0.2);
   const [isMobile, setIsMobile] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoveredWebsite, setHoveredWebsite] = useState(null);
+  const [imageError, setImageError] = useState(false);
   const isEven = index % 2 === 0;
   const contrast = getContrastColor(isEven);
   
-  // Get website URL for this project
-  const getWebsiteUrl = () => {
-    const categoryLinks = websiteLinks[project.category];
-    if (categoryLinks && project.client) {
-      // Convert client name to domain format if needed
-      const clientDomain = project.client.toLowerCase().replace(/\s+/g, '') + '.com';
-      return categoryLinks[clientDomain] || categoryLinks[project.client] || '#';
-    }
-    return '#';
+  // Get websites for this category
+  const getCategoryWebsites = () => {
+    return websiteLinks[project.category] || {};
   };
 
   // Check for mobile on mount and resize
@@ -99,19 +213,30 @@ export default function ProjectSection({ project, index }) {
   }, []);
 
   // Handle website visit
-  const handleVisitSite = () => {
-    const url = getWebsiteUrl();
-    if (url !== '#') {
+  const handleVisitSite = (url) => {
+    if (url && url !== '#') {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
-  // Black & white blob colors based on project color
-  const blobColor = isEven ? '#ffffff' : '#000000';
-  const blobOpacity = isEven ? 0.15 : 0.1;
+  // Get category number
+  const getCategoryNumber = () => {
+    const categoryIndex = categoryOrder.indexOf(project.category);
+    return categoryIndex !== -1 ? categoryIndex + 1 : index + 1;
+  };
+
+  const categoryWebsites = getCategoryWebsites();
+  const categoryNumber = getCategoryNumber();
+  const categoryImage = getCategoryImage(project.category);
+
+  // Accent blob
+  const blobColor = ACCENT;
+  const blobOpacity = 0.08;
 
   return (
-    <BlobBackground color={blobColor}>
+    <>
+      <style>{globalStyles}</style>
+      
       <section
         ref={ref}
         style={{
@@ -124,20 +249,18 @@ export default function ProjectSection({ project, index }) {
           padding: isMobile ? "60px 0" : "80px 0",
         }}
       >
-        {/* Black & White blob - alternating between sections */}
+        {/* Accent blob */}
         <div style={{
           position: "absolute",
-          width: isMobile ? 300 : 500,
-          height: isMobile ? 300 : 500,
+          width: isMobile ? 300 : 600,
+          height: isMobile ? 300 : 600,
           borderRadius: "50%",
           background: blobColor,
-          filter: "blur(100px)",
+          filter: "blur(120px)",
           opacity: blobOpacity,
-          top: isMobile ? "30%" : "50%",
-          left: isMobile 
-            ? (isEven ? "70%" : "30%") 
-            : (isEven ? "60%" : "30%"),
-          transform: "translate(-50%,-50%)",
+          top: "50%",
+          left: isEven ? "60%" : "40%",
+          transform: "translate(-50%, -50%)",
           pointerEvents: "none",
           transition: "all 0.3s ease",
         }} />
@@ -148,389 +271,356 @@ export default function ProjectSection({ project, index }) {
           margin: "0 auto",
           padding: isMobile ? "0 24px" : "0 48px",
           width: "100%",
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          gap: isMobile ? 48 : 80,
-          alignItems: isMobile ? "stretch" : "center",
+          position: "relative",
+          zIndex: 2,
         }}>
-          {/* Text Section */}
-          <div style={{ 
-            order: isMobile ? 1 : (isEven ? 1 : 2),
-            width: isMobile ? "100%" : "50%",
-          }}>
-            {/* Category Badge with Website Link */}
-            <a
-              href={getWebsiteUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`proj-badge fade-up ${visible ? "in" : ""}`}
-              style={{
-                display: "inline-block",
-                padding: isMobile ? "8px 18px" : "10px 22px",
-                background: isEven 
-                  ? 'linear-gradient(135deg, #1A1A1A, #2C2C2C)'
-                  : 'linear-gradient(135deg, #FFFFFF, #F0F0F0)',
-                borderRadius: 40,
-                color: isEven ? '#FFFFFF' : '#1A1A1A',
-                fontSize: isMobile ? "0.7rem" : "0.75rem",
-                letterSpacing: "0.2em",
-                fontWeight: 600,
-                marginBottom: isMobile ? 20 : 28,
-                boxShadow: `0 8px 24px ${blobColor}40`,
-                transitionDelay: "0s",
-                border: `1px solid ${contrast.border}`,
-                textDecoration: 'none',
-                cursor: 'pointer',
-                fontFamily: fonts.subheading,
-                textTransform: 'uppercase',
-              }}
-            >
-              {project.icon} {project.category} ↗
-            </a>
-
-            {/* Title with Crimson font */}
-            <h2
-              className={`fade-up ${visible ? "in" : ""}`}
-              style={{
-                fontFamily: fonts.heading,
-                fontSize: isMobile ? "clamp(1.8rem, 6vw, 2.2rem)" : "clamp(2.2rem, 4vw, 3.6rem)",
-                fontWeight: 700,
-                lineHeight: 1.1,
-                color: isEven ? DARK : '#FFFFFF',
-                marginBottom: isMobile ? 16 : 24,
-                transitionDelay: "0.1s",
-                fontStyle: 'normal',
-              }}
-            >
-              {project.title}
-              <span style={{
-                display: "block",
-                width: visible ? (isMobile ? 60 : 80) : 0,
-                height: 4,
-                background: isEven ? DARK : '#FFFFFF',
-                borderRadius: 2,
-                marginTop: isMobile ? 8 : 12,
-                transition: "width 0.8s cubic-bezier(0.4,0,0.2,1) 0.5s",
-              }} />
-            </h2>
-
-            {/* Meta with website links */}
-            <div
-              className={`fade-up ${visible ? "in" : ""}`}
-              style={{ 
-                display: "flex", 
-                gap: isMobile ? 20 : 40, 
-                marginBottom: isMobile ? 16 : 24, 
-                transitionDelay: "0.15s",
-                flexWrap: isMobile ? "wrap" : "nowrap",
-              }}
-            >
-              {[
-                ["CLIENT", project.client, getWebsiteUrl()],
-                ["YEAR", project.year]
-              ].map(([label, val, url]) => (
-                <div key={label}>
-                  <div style={{ 
-                    fontSize: isMobile ? "0.6rem" : "0.65rem", 
-                    color: isEven ? '#666' : '#AAA', 
-                    letterSpacing: "0.12em", 
-                    marginBottom: 4,
-                    fontFamily: fonts.mono,
-                    textTransform: 'uppercase',
-                  }}>
-                    {label}
-                  </div>
-                  {url ? (
-                    <a
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        fontSize: isMobile ? "0.9rem" : "1.1rem",
-                        fontWeight: 700,
-                        color: isEven ? '#1A1A1A' : '#FFFFFF',
-                        textDecoration: 'none',
-                        fontFamily: fonts.stats,
-                        borderBottom: `1px dotted ${isEven ? '#1A1A1A' : '#FFFFFF'}`,
-                        transition: 'all 0.3s ease',
-                      }}
-                      onMouseEnter={(e) => e.target.style.borderBottom = '1px solid'}
-                      onMouseLeave={(e) => e.target.style.borderBottom = '1px dotted'}
-                    >
-                      {val} ↗
-                    </a>
-                  ) : (
-                    <div style={{ 
-                      fontSize: isMobile ? "0.9rem" : "1.1rem", 
-                      fontWeight: 700, 
-                      color: isEven ? '#1A1A1A' : '#FFFFFF',
-                      fontFamily: fonts.stats,
-                    }}>
-                      {val}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Description */}
-            <p
-              className={`fade-up ${visible ? "in" : ""}`}
-              style={{ 
-                fontSize: isMobile ? "0.95rem" : "1.05rem", 
-                lineHeight: 1.8, 
-                color: isEven ? '#444' : '#CCC', 
-                marginBottom: isMobile ? 24 : 32, 
-                transitionDelay: "0.2s",
-                fontFamily: fonts.body,
-                fontWeight: 400,
-              }}
-            >
-              {project.description}
-            </p>
-
-            {/* Stats with Crimson font */}
-            <div
-              className={`fade-up ${visible ? "in" : ""}`}
-              style={{ 
-                display: "grid", 
-                gridTemplateColumns: isMobile ? "repeat(3,1fr)" : "repeat(3,1fr)", 
-                gap: isMobile ? 8 : 16, 
-                marginBottom: isMobile ? 28 : 36, 
-                transitionDelay: "0.25s" 
-              }}
-            >
-              {Object.entries(project.stats).map(([key, value]) => (
-                <div
-                  key={key}
-                  className="stat-card"
-                  style={{
-                    padding: isMobile ? "12px 8px" : "18px 12px",
-                    background: isEven ? '#F8F8F8' : '#2C2C2C',
-                    borderRadius: isMobile ? 12 : 16,
-                    textAlign: "center",
-                    boxShadow: `0 8px 24px -8px ${blobColor}80`,
-                    border: `1px solid ${isEven ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)'}`,
-                  }}
-                >
-                  <div style={{ 
-                    fontSize: isMobile ? "1.3rem" : "1.8rem", 
-                    fontWeight: 700, 
-                    color: isEven ? '#1A1A1A' : '#FFFFFF', 
-                    lineHeight: 1,
-                    fontFamily: fonts.stats,
-                  }}>
-                    {value}
-                  </div>
-                  <div style={{ 
-                    fontSize: isMobile ? "0.55rem" : "0.65rem", 
-                    color: isEven ? '#666' : '#AAA', 
-                    textTransform: "uppercase", 
-                    letterSpacing: "0.1em", 
-                    marginTop: 4,
-                    fontFamily: fonts.mono,
-                  }}>
-                    {key}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Buttons */}
-            <div
-              className={`fade-up ${visible ? "in" : ""}`}
-              style={{ 
-                display: "flex", 
-                gap: isMobile ? 10 : 14, 
-                transitionDelay: "0.3s",
-                flexDirection: isMobile ? "column" : "row",
-                width: isMobile ? "100%" : "auto",
-              }}
-            >
-              <button 
-                className="btn-primary" 
-                style={{ 
-                  background: isEven 
-                    ? 'linear-gradient(135deg, #1A1A1A, #2C2C2C)'
-                    : 'linear-gradient(135deg, #FFFFFF, #F0F0F0)',
-                  boxShadow: `0 16px 32px -8px ${blobColor}80`,
-                  color: isEven ? '#FFFFFF' : '#1A1A1A',
-                  width: isMobile ? "100%" : "auto",
-                  padding: isMobile ? "14px 24px" : "16px 32px",
-                  fontSize: isMobile ? "0.85rem" : "0.95rem",
-                  border: 'none',
-                  borderRadius: '50px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  fontFamily: fonts.subheading,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-              >
-                VIEW CASE STUDY
-              </button>
-              <button 
-                onClick={handleVisitSite}
-                className="btn-outline" 
-                style={{ 
-                  borderColor: isEven ? '#1A1A1A' : '#FFFFFF', 
-                  color: isEven ? '#1A1A1A' : '#FFFFFF',
-                  background: 'transparent',
-                  width: isMobile ? "100%" : "auto",
-                  padding: isMobile ? "14px 24px" : "16px 32px",
-                  fontSize: isMobile ? "0.85rem" : "0.95rem",
-                  borderRadius: '50px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  border: `2px solid ${isEven ? '#1A1A1A' : '#FFFFFF'}`,
-                  fontFamily: fonts.subheading,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = isEven ? '#1A1A1A' : '#FFFFFF';
-                  e.target.style.color = isEven ? '#FFFFFF' : '#1A1A1A';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = isEven ? '#1A1A1A' : '#FFFFFF';
-                }}
-              >
-                VISIT SITE ↗
-              </button>
-            </div>
-          </div>
-
-          {/* Image Card Section */}
+          
+          {/* Section header with category number */}
           <div
             className={`fade-up ${visible ? "in" : ""}`}
-            style={{ 
-              order: isMobile ? 2 : (isEven ? 2 : 1),
-              width: isMobile ? "100%" : "50%",
-              transitionDelay: "0.15s",
+            style={{
+              marginBottom: isMobile ? 40 : 60,
+              textAlign: "left",
             }}
           >
-            <a
-              href={getWebsiteUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: 'none' }}
-            >
-              <div
-                className="image-card"
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              marginBottom: isMobile ? 8 : 12,
+            }}>
+              <span style={{
+                fontFamily: fonts.subheading,
+                fontSize: isMobile ? "0.8rem" : "0.9rem",
+                fontWeight: 500,
+                color: contrast.accent,
+                opacity: 0.8,
+              }}>
+                0{categoryNumber}
+              </span>
+              <div style={{
+                width: 40,
+                height: 1,
+                background: contrast.accent,
+                opacity: 0.3,
+              }} />
+            </div>
+
+            <h2 style={{
+              fontFamily: fonts.heading,
+              fontSize: isMobile ? "clamp(1.8rem, 6vw, 2.2rem)" : "clamp(2rem, 4vw, 2.8rem)",
+              fontWeight: 400,
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              color: isEven ? '#1A1A1A' : ACCENT,
+              maxWidth: isMobile ? "100%" : "80%",
+            }}>
+              {project.category}
+            </h2>
+
+            <div style={{
+              width: isMobile ? 40 : 60,
+              height: 1.5,
+              background: contrast.accent,
+              margin: isMobile ? "16px 0 0" : "20px 0 0",
+              opacity: 0.3,
+            }} />
+          </div>
+
+          {/* Project content - alternating layout */}
+          <div style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : (isEven ? "row" : "row-reverse"),
+            gap: isMobile ? 40 : 80,
+            alignItems: isMobile ? "stretch" : "flex-start",
+          }}>
+            {/* Text Section with Website List */}
+            <div style={{ 
+              width: isMobile ? "100%" : "45%",
+            }}>
+              {/* Project Title */}
+              <h3
+                className={`fade-up ${visible ? "in" : ""}`}
                 style={{
-                  width: "100%",
-                  height: isMobile ? 380 : 520,
-                  borderRadius: isMobile ? 20 : 28,
-                  background: isEven 
-                    ? 'linear-gradient(135deg, #F0F0F0, #FFFFFF)'
-                    : 'linear-gradient(135deg, #2C2C2C, #1A1A1A)',
-                  position: "relative",
-                  overflow: "hidden",
-                  boxShadow: `0 40px 80px -20px ${blobColor}80`,
-                  cursor: 'pointer',
-                  transition: 'transform 0.3s ease',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-              >
-                {/* Shine overlay */}
-                <div style={{
-                  position: "absolute", inset: 0,
-                  background: isEven
-                    ? "linear-gradient(135deg, rgba(0,0,0,0.05) 0%, transparent 50%)"
-                    : "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%)",
-                  zIndex: 2,
-                }} />
-
-                {/* Icon center */}
-                <div style={{
-                  position: "absolute", inset: 0,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: isMobile ? "6rem" : "8rem",
-                  opacity: 0.35,
-                  zIndex: 1,
-                  userSelect: "none",
+                  fontFamily: fonts.heading,
+                  fontSize: isMobile ? "1.4rem" : "1.8rem",
+                  fontWeight: 500,
+                  lineHeight: 1.2,
                   color: isEven ? '#1A1A1A' : '#FFFFFF',
+                  marginBottom: isMobile ? 20 : 28,
+                  transitionDelay: "0.1s",
+                }}
+              >
+                {project.title}
+              </h3>
+
+              {/* Description */}
+              <p
+                className={`fade-up ${visible ? "in" : ""}`}
+                style={{ 
+                  fontSize: isMobile ? "0.95rem" : "1rem", 
+                  lineHeight: 1.7, 
+                  color: isEven ? '#555' : '#AAA', 
+                  marginBottom: isMobile ? 28 : 36, 
+                  transitionDelay: "0.15s",
+                  fontFamily: fonts.body,
+                  fontWeight: 300,
+                }}
+              >
+                {project.description}
+              </p>
+
+              {/* Websites List - Formatted as per your structure */}
+              <div
+                className={`fade-up ${visible ? "in" : ""}`}
+                style={{ 
+                  marginBottom: isMobile ? 28 : 36,
+                  transitionDelay: "0.2s",
+                }}
+              >
+                <div style={{
+                  fontFamily: fonts.subheading,
+                  fontSize: isMobile ? "0.7rem" : "0.75rem",
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: contrast.accent,
+                  marginBottom: isMobile ? 16 : 20,
+                  fontWeight: 500,
                 }}>
-                  {project.icon}
+                  Websites
                 </div>
 
-                {/* Floating particles */}
-                {PARTICLES.map((p, i) => (
-                  <div
-                    key={i}
-                    className="particle"
-                    style={{
-                      position: "absolute",
-                      bottom: 20,
-                      left: p.left,
-                      width: isMobile ? 4 : 5,
-                      height: isMobile ? 4 : 5,
-                      background: isEven ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)',
-                      borderRadius: "50%",
-                      animationDuration: p.duration,
-                      animationDelay: p.delay,
-                    }}
-                  />
-                ))}
-
-                {/* Top badge - Website Category */}
                 <div style={{
-                  position: "absolute", top: isMobile ? 16 : 24, right: isMobile ? 16 : 24,
-                  padding: isMobile ? "8px 16px" : "10px 20px",
-                  background: isEven 
-                    ? 'rgba(0,0,0,0.8)' 
-                    : 'rgba(255,255,255,0.9)',
-                  backdropFilter: "blur(12px)",
-                  borderRadius: 40,
-                  color: isEven ? '#FFFFFF' : '#1A1A1A',
-                  fontSize: isMobile ? "0.7rem" : "0.8rem",
-                  fontWeight: 600,
-                  border: `1px solid ${contrast.border}`,
-                  zIndex: 3,
-                  fontFamily: fonts.mono,
-                  letterSpacing: '0.05em',
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: isMobile ? 12 : 16,
                 }}>
-                  {project.category}
+                  {Object.entries(categoryWebsites).map(([domain, url], idx) => (
+                    <div
+                      key={domain}
+                      className="website-link"
+                      onClick={() => handleVisitSite(url)}
+                      onMouseEnter={() => setHoveredWebsite(domain)}
+                      onMouseLeave={() => setHoveredWebsite(null)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 12,
+                        cursor: "pointer",
+                        padding: isMobile ? "8px 0" : "6px 0",
+                        borderBottom: idx < Object.keys(categoryWebsites).length - 1 
+                          ? `1px solid ${contrast.border}` 
+                          : 'none',
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span style={{
+                        fontFamily: fonts.body,
+                        fontSize: isMobile ? "0.9rem" : "1rem",
+                        color: hoveredWebsite === domain 
+                          ? contrast.accent 
+                          : (isEven ? '#333' : '#DDD'),
+                        fontWeight: hoveredWebsite === domain ? 500 : 400,
+                        transition: "all 0.2s ease",
+                      }}>
+                        {domain}
+                      </span>
+                      
+                      {/* Arrow indicator on hover */}
+                      <span style={{
+                        opacity: hoveredWebsite === domain ? 1 : 0,
+                        transform: hoveredWebsite === domain ? "translateX(0)" : "translateX(-10px)",
+                        transition: "all 0.2s ease",
+                        color: contrast.accent,
+                        fontSize: isMobile ? "1rem" : "1.1rem",
+                      }}>
+                        ↗
+                      </span>
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                {/* Bottom info strip with website */}
-                <div style={{
-                  position: "absolute", bottom: 0, left: 0, right: 0,
-                  padding: isMobile ? "20px 20px" : "28px 28px",
-                  background: isEven
-                    ? "linear-gradient(to top, rgba(0,0,0,0.8), transparent)"
-                    : "linear-gradient(to top, rgba(0,0,0,0.9), transparent)",
-                  zIndex: 3,
-                }}>
+              {/* Project Meta - Year */}
+              <div
+                className={`fade-up ${visible ? "in" : ""}`}
+                style={{ 
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 24,
+                  transitionDelay: "0.25s",
+                }}
+              >
+                <div>
                   <div style={{ 
-                    color: '#FFFFFF', 
-                    fontSize: isMobile ? "0.6rem" : "0.7rem", 
-                    letterSpacing: "0.15em",
-                    fontFamily: fonts.mono,
+                    fontSize: isMobile ? "0.6rem" : "0.65rem", 
+                    color: isEven ? '#999' : '#777', 
+                    letterSpacing: "0.12em", 
+                    marginBottom: 4,
+                    fontFamily: fonts.subheading,
                     textTransform: 'uppercase',
-                    opacity: 0.8,
                   }}>
-                    LIVE WEBSITE
+                    Year
                   </div>
                   <div style={{ 
-                    color: '#FFFFFF', 
-                    fontWeight: 700, 
-                    fontSize: isMobile ? "0.9rem" : "1.1rem", 
-                    letterSpacing: "0.05em",
-                    fontFamily: fonts.heading,
+                    fontSize: isMobile ? "0.9rem" : "1rem",
+                    fontWeight: 500,
+                    color: contrast.accent,
+                    fontFamily: fonts.subheading,
                   }}>
-                    {project.client} ↗
+                    {project.year}
                   </div>
                 </div>
               </div>
-            </a>
+            </div>
+
+            {/* Image Card Section with actual images */}
+            <div
+              className={`fade-up ${visible ? "in" : ""}`}
+              style={{ 
+                width: isMobile ? "100%" : "50%",
+                transitionDelay: "0.2s",
+              }}
+            >
+              <a
+                href={Object.values(categoryWebsites)[0]}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none', display: 'block' }}
+              >
+                <div
+                  className="project-card"
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  style={{
+                    width: "100%",
+                    aspectRatio: "4/3",
+                    borderRadius: isMobile ? 20 : 24,
+                    background: isEven 
+                      ? contrast.cardGradient
+                      : contrast.cardGradient,
+                    position: "relative",
+                    overflow: "hidden",
+                    boxShadow: isHovered 
+                      ? `0 40px 60px -20px ${contrast.accent}80`
+                      : `0 30px 40px -20px rgba(0,0,0,0.3)`,
+                    border: `1px solid ${contrast.border}`,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {/* Background Image */}
+                  {!imageError ? (
+                    <Image
+                      src={categoryImage}
+                      alt={project.category}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="project-image"
+                      style={{
+                        objectFit: 'cover',
+                        transition: 'transform 0.7s cubic-bezier(0.2, 0.9, 0.3, 1)',
+                        transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+                      }}
+                      onError={() => setImageError(true)}
+                      priority={index < 2}
+                    />
+                  ) : (
+                    // Fallback gradient if image fails to load
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: `linear-gradient(135deg, ${ACCENT_SOFT}, ${ACCENT_MID})`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <span style={{
+                        fontFamily: fonts.heading,
+                        fontSize: isMobile ? '3rem' : '4rem',
+                        color: ACCENT,
+                        opacity: 0.3,
+                      }}>
+                        {project.icon || "◈"}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Dark overlay for text readability */}
+                  <div style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)',
+                    zIndex: 2,
+                  }} />
+
+                  {/* Shine overlay on hover */}
+                  {isHovered && (
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
+                      zIndex: 3,
+                      pointerEvents: 'none',
+                    }} />
+                  )}
+
+                  {/* Top right badge - Category */}
+                
+
+                  {/* Bottom info strip - Project Title */}
+                  <div style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0,
+                    padding: isMobile ? "20px 20px" : "24px 24px",
+                    zIndex: 4,
+                  }}>
+             
+                    <div style={{ 
+                      color: '#FFFFFF', 
+                      fontWeight: 500, 
+                      fontSize: isMobile ? "1rem" : "1.2rem", 
+                      fontFamily: fonts.heading,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                    }}>
+                      {project.title}
+                    </div>
+                  </div>
+
+                  {/* Floating particles with accent (only show if no image or as decorative) */}
+                  {imageError && PARTICLES.map((p, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        position: "absolute",
+                        bottom: 20 + (i * 8),
+                        left: p.left,
+                        width: isMobile ? 3 : 4,
+                        height: isMobile ? 3 : 4,
+                        background: ACCENT,
+                        borderRadius: "50%",
+                        opacity: 0.3,
+                        animation: `shimmer ${p.duration} ease-in-out infinite`,
+                        animationDelay: p.delay,
+                        zIndex: 3,
+                      }}
+                    />
+                  ))}
+                </div>
+              </a>
+            </div>
           </div>
+
+          {/* Footer line with accent */}
+          <div
+            className={`fade-up ${visible ? "in" : ""}`}
+            style={{
+              width: "100%",
+              marginTop: isMobile ? 48 : 60,
+              borderTop: `1px solid ${contrast.accentMid}`,
+              transitionDelay: "0.3s",
+            }}
+          />
         </div>
       </section>
-    </BlobBackground>
+    </>
   );
-}
+}  
