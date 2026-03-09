@@ -20,53 +20,83 @@ export default function HeroSection({ heroVisible, setHovered }) {
 
   const scrollToNextSection = () => {
     const next = document.querySelector("#hero-section")?.nextElementSibling;
-
     if (next) {
-      next.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      next.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  const badges = [
+    {
+      text: "DESIGN",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+        </svg>
+      ),
+    },
+    {
+      text: "DEVELOP",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+      ),
+    },
+    {
+      text: "STRATEGY",
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 20h20"/>
+          <path d="M5 20V10l7-7 7 7v10"/>
+          <path d="M9 20v-5h6v5"/>
+        </svg>
+      ),
+    },
+  ];
 
   return (
     <section
       id="hero-section"
       style={{
-        minHeight: "100vh",
+        minHeight: "90vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         position: "relative",
         overflow: "hidden",
         background: "#0A0A0A",
+        touchAction: "pan-y",
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => !isMobile && setHovered(true)}
+      onMouseLeave={() => !isMobile && setHovered(false)}
     >
 
-      {/* SPLASH CURSOR */}
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
-      >
-        <SplashCursor
-          SIM_RESOLUTION={isMobile ? 64 : 128}
-          DYE_RESOLUTION={isMobile ? 512 : 1024}
-          DENSITY_DISSIPATION={3.5}
-          VELOCITY_DISSIPATION={2}
-          PRESSURE={0.1}
-          PRESSURE_ITERATIONS={20}
-          CURL={3}
-          SPLAT_RADIUS={0.2}
-          SPLAT_FORCE={6000}
-          COLOR_UPDATE_SPEED={10}
-        />
-      </div>
+      {/* SPLASH CURSOR — desktop only */}
+      {!isMobile && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            pointerEvents: "none",
+            zIndex: 1,
+          }}
+        >
+          <SplashCursor
+            SIM_RESOLUTION={128}
+            DYE_RESOLUTION={1024}
+            DENSITY_DISSIPATION={3.5}
+            VELOCITY_DISSIPATION={2}
+            PRESSURE={0.1}
+            PRESSURE_ITERATIONS={20}
+            CURL={3}
+            SPLAT_RADIUS={0.2}
+            SPLAT_FORCE={6000}
+            COLOR_UPDATE_SPEED={10}
+          />
+        </div>
+      )}
 
       {/* GRID */}
       <div
@@ -91,6 +121,7 @@ export default function HeroSection({ heroVisible, setHovered }) {
           textAlign: "center",
           maxWidth: 1100,
           padding: "0 24px",
+          pointerEvents: "none",
         }}
       >
 
@@ -104,24 +135,42 @@ export default function HeroSection({ heroVisible, setHovered }) {
             flexWrap: "wrap",
           }}
         >
-          {["DESIGN", "DEVELOP", "STRATEGY"].map((text, i) => (
-            <span
+          {badges.map((badge, i) => (
+            <div
               key={i}
               style={{
-                padding: "8px 18px",
-                background: "#000",
-                border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 40,
-                color: "#fff",
-                fontSize: "0.72rem",
-                letterSpacing: "0.18em",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 8,
                 animation: heroVisible
                   ? `badgeFloat ${2.2 + i * 0.4}s ease-in-out infinite`
                   : "none",
+                animationDelay: `${i * 0.2}s`,
               }}
             >
-              {text}
-            </span>
+              {/* Icon — only show on mobile */}
+              {isMobile && (
+                <div style={{ opacity: 0.9 }}>
+                  {badge.icon}
+                </div>
+              )}
+
+              {/* Pill badge */}
+              <span
+                style={{
+                  padding: "8px 18px",
+                  background: "#000",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 40,
+                  color: "#fff",
+                  fontSize: "0.72rem",
+                  letterSpacing: "0.18em",
+                }}
+              >
+                {badge.text}
+              </span>
+            </div>
           ))}
         </div>
 
@@ -142,7 +191,9 @@ export default function HeroSection({ heroVisible, setHovered }) {
           <span
             style={{
               textShadow: `0 0 40px ${ACCENT}80`,
+              fontFamily: "'Playfair Display', serif",
               fontStyle: "italic",
+              color: ACCENT,
             }}
           >
             SAHAAY
@@ -167,59 +218,11 @@ export default function HeroSection({ heroVisible, setHovered }) {
         </p>
       </div>
 
-      {/* MOBILE SCROLL BUTTON */}
-      {isMobile && (
-        <button
-          onClick={scrollToNextSection}
-          style={{
-            position: "absolute",
-            bottom: "80px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "46px",
-            height: "46px",
-            borderRadius: "14px",
-            background: "rgba(255,255,255,0.15)",
-            border: "1px solid rgba(255,255,255,0.3)",
-            color: "#fff",
-            fontSize: "1.4rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(10px)",
-            cursor: "pointer",
-            zIndex: 50,
-            animation: "mobilePulse 2s infinite",
-          }}
-        >
-          ↓
-        </button>
-      )}
-
-      {/* DESKTOP SCROLL */}
-      {!isMobile && (
-        <div
-          onClick={scrollToNextSection}
-          style={{
-            position: "absolute",
-            bottom: "60px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            fontSize: "1.8rem",
-            color: "rgba(255,255,255,0.7)",
-            cursor: "pointer",
-            animation: "desktopBounce 2s infinite",
-            zIndex: 20,
-          }}
-        >
-          
-        </div>
-      )}
-
       <style jsx>{`
 
         #hero-section canvas {
-          pointer-events:none !important;
+          pointer-events: none !important;
+          touch-action: none !important;
         }
 
         @keyframes desktopBounce {

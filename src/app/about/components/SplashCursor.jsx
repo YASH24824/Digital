@@ -101,7 +101,7 @@ function SplashCursor({
       if (isWebGL2) {
         gl.getExtension('EXT_color_buffer_float');
         supportLinearFiltering = gl.getExtension('OES_texture_float_linear');
-      } else {
+      } else { 
         halfFloat = gl.getExtension('OES_texture_half_float');
         supportLinearFiltering = gl.getExtension('OES_texture_half_float_linear');
       }
