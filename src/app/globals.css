@@ -143,3 +143,18 @@ html.lenis {
     @apply bg-background text-foreground;
   }
 }
+
+     #hero-section canvas {
+          pointer-events: none !important;
+          touch-action: none !important;
+        }
+
+        @keyframes badgeFloat {
+          0%,
+          100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-6px);
+          }
+        }

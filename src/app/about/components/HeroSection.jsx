@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import SplashCursor from "./SplashCursor";
 import { ACCENT } from "../data/aboutData";
@@ -230,22 +229,7 @@ export default function HeroSection({ heroVisible, setHovered = () => {} }) {
         </p>
       </div>
 
-      <style jsx>{`
-        #hero-section canvas {
-          pointer-events: none !important;
-          touch-action: none !important;
-        }
-
-        @keyframes badgeFloat {
-          0%,
-          100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-6px);
-          }
-        }
-      `}</style>
+      
     </section>
   );
 }
