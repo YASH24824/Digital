@@ -31,6 +31,9 @@ export default function Hero() {
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "Playfair Display, serif",
+ fontFamily: "Playfair Display, serif",
+
+
         transition: "background 0.4s ease",
       }}
     >
