@@ -1,10 +1,10 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import SplashCursor from "./SplashCursor";
 import { ACCENT } from "../data/aboutData";
 
-export default function HeroSection({ heroVisible, setHovered }) {
-
+export default function HeroSection({ heroVisible, setHovered = () => {} }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -18,39 +18,59 @@ export default function HeroSection({ heroVisible, setHovered }) {
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
 
-  const scrollToNextSection = () => {
-    const next = document.querySelector("#hero-section")?.nextElementSibling;
-    if (next) {
-      next.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   const badges = [
     {
       text: "DESIGN",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={ACCENT}
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" />
         </svg>
       ),
     },
     {
       text: "DEVELOP",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="16 18 22 12 16 6"/>
-          <polyline points="8 6 2 12 8 18"/>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={ACCENT}
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="16 18 22 12 16 6" />
+          <polyline points="8 6 2 12 8 18" />
         </svg>
       ),
     },
     {
       text: "STRATEGY",
       icon: (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M2 20h20"/>
-          <path d="M5 20V10l7-7 7 7v10"/>
-          <path d="M9 20v-5h6v5"/>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={ACCENT}
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M2 20h20" />
+          <path d="M5 20V10l7-7 7 7v10" />
+          <path d="M9 20v-5h6v5" />
         </svg>
       ),
     },
@@ -72,8 +92,7 @@ export default function HeroSection({ heroVisible, setHovered }) {
       onMouseEnter={() => !isMobile && setHovered(true)}
       onMouseLeave={() => !isMobile && setHovered(false)}
     >
-
-      {/* SPLASH CURSOR — desktop only */}
+      {/* SPLASH CURSOR */}
       {!isMobile && (
         <div
           style={{
@@ -98,7 +117,7 @@ export default function HeroSection({ heroVisible, setHovered }) {
         </div>
       )}
 
-      {/* GRID */}
+      {/* GRID BACKGROUND */}
       <div
         style={{
           position: "absolute",
@@ -124,7 +143,6 @@ export default function HeroSection({ heroVisible, setHovered }) {
           pointerEvents: "none",
         }}
       >
-
         {/* BADGES */}
         <div
           style={{
@@ -149,14 +167,8 @@ export default function HeroSection({ heroVisible, setHovered }) {
                 animationDelay: `${i * 0.2}s`,
               }}
             >
-              {/* Icon — only show on mobile */}
-              {isMobile && (
-                <div style={{ opacity: 0.9 }}>
-                  {badge.icon}
-                </div>
-              )}
+              {isMobile && <div style={{ opacity: 0.9 }}>{badge.icon}</div>}
 
-              {/* Pill badge */}
               <span
                 style={{
                   padding: "8px 18px",
@@ -219,42 +231,20 @@ export default function HeroSection({ heroVisible, setHovered }) {
       </div>
 
       <style jsx>{`
-
         #hero-section canvas {
           pointer-events: none !important;
           touch-action: none !important;
         }
 
-        @keyframes desktopBounce {
-          0%,20%,50%,80%,100%{
-            transform:translateX(-50%) translateY(0);
-          }
-          40%{
-            transform:translateX(-50%) translateY(-18px);
-          }
-          60%{
-            transform:translateX(-50%) translateY(-10px);
-          }
-        }
-
-        @keyframes mobilePulse {
-          0%,100%{
-            transform:translateX(-50%) scale(1);
-          }
-          50%{
-            transform:translateX(-50%) scale(1.12);
-          }
-        }
-
         @keyframes badgeFloat {
-          0%,100%{
-            transform:translateY(0);
+          0%,
+          100% {
+            transform: translateY(0);
           }
-          50%{
-            transform:translateY(-6px);
+          50% {
+            transform: translateY(-6px);
           }
         }
-
       `}</style>
     </section>
   );
